@@ -1,0 +1,10 @@
+name: trafficshifting
+home: https://github.com/jakkaj/ravenswood
+version: "1.0"
+description: Some Shifty Routes
+icon: https://docs.microsoft.com/favicon.ico
+sources:
+  - https://github.com/jakkaj/ravenswood
+maintainers:
+  - name: Jordan Kight
+    email: jordan.knight@microsoft.com 

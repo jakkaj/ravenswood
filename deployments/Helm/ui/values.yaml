@@ -1,0 +1,10 @@
+Version: 2
+Build: 136
+Servers: 1
+ServerPort: 8080
+
+Cpu: "0.5"
+Memory: "1Gi"
+
+Image: "jakkaj/stormui:latest"
+ImagePullPolicy: "IfNotPresent"

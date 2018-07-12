@@ -1,0 +1,13 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: testservices
+spec:
+  hosts:
+  - "http://7ff6c671.ngrok.io" 
+  - "52.230.64.147" 
+  - "137.116.151.114" 
+  ports:
+  - number: 80
+    name: http
+    protocol: HTTP

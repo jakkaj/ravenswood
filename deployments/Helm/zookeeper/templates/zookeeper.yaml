@@ -1,0 +1,165 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "zk-hs-{{.Values.Version}}-{{.Values.Build}}"
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "zk-{{.Values.Version}}-{{.Values.Build}}"
+spec:
+  ports:
+  - port: {{.Values.ServerPort}}
+    name: server
+  - port: {{.Values.LeaderElectionPort}}
+    name: leader-election
+  - port: {{.Values.ClientPort}}
+    name: client
+  clusterIP: None
+  selector:
+    component: "zk-{{.Values.Version}}-{{.Values.Build}}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "zk-cs-{{.Values.Version}}-{{.Values.Build}}"
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "zk-{{.Values.Version}}-{{.Values.Build}}"
+spec:
+  ports:
+  - port: {{.Values.ClientPort}}
+    name: client
+  selector:
+    component: "zk-{{.Values.Version}}-{{.Values.Build}}"
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: "zk-pdb-{{.Values.Version}}-{{.Values.Build}}"
+  annotations:
+    helm.sh/created: {{.Release.Time.Seconds | quote }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "zk-{{.Values.Version}}-{{.Values.Build}}"
+spec:
+  selector:
+    matchLabels:
+      component: "zk-{{.Values.Version}}-{{.Values.Build}}"
+  maxUnavailable: {{.Values.MaxUnavailable}}
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: "zk-{{.Values.Version}}-{{.Values.Build}}"
+  annotations:
+    helm.sh/created: {{.Release.Time.Seconds | quote }}    
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "zk-{{.Values.Version}}-{{.Values.Build}}"
+spec:
+  serviceName: "zk-hs-{{.Values.Version}}-{{.Values.Build}}"
+  replicas: {{.Values.Servers}}
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: {{.Values.UpdateStrategy}}
+  template:
+    metadata:
+      labels:
+        component: "zk-{{.Values.Version}}-{{.Values.Build}}"
+      annotations: 
+        sidecar.istio.io/inject: "false"
+    spec:
+      {{- if eq .Values.AntiAffinity "hard"}}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "component"
+                    operator: In
+                    values:
+                    - "zk-{{.Values.Version}}-{{.Values.Build}}"
+              topologyKey: "kubernetes.io/hostname"
+      {{- else if eq .Values.AntiAffinity "soft"}}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+             - weight: 1
+               podAffinityTerm:
+                 labelSelector:
+                    matchExpressions:
+                      - key: "component"
+                        operator: In
+                        values:
+                         - "zk-{{.Values.Version}}-{{.Values.Build}}"
+                 topologyKey: "kubernetes.io/hostname"
+      {{- end}}
+      containers:
+      - name: k8szk
+        imagePullPolicy: {{.Values.ImagePullPolicy}}
+        image: {{.Values.Image}}
+        resources:
+          requests:
+            memory: {{.Values.Memory}}
+            cpu: {{.Values.Cpu}}
+        ports:
+        - containerPort: {{.Values.ClientPort}}
+          name: client
+        - containerPort: {{.Values.ServerPort}}
+          name: server
+        - containerPort: {{.Values.LeaderElectionPort}}
+          name: leader-election
+        command:
+        - sh
+        - -c
+        - "start-zookeeper \
+          --servers={{.Values.Servers}} \
+          --data_dir=/var/lib/zookeeper/data \
+          --data_log_dir=/var/lib/zookeeper/data/log \
+          --conf_dir=/opt/zookeeper/conf \
+          --client_port={{.Values.ClientPort}} \
+          --election_port={{.Values.LeaderElectionPort}} \
+          --server_port={{.Values.ServerPort}} \
+          --tick_time={{.Values.TickTimeMs}} \
+          --init_limit={{.Values.InitTicks}} \
+          --sync_limit={{.Values.SyncTicks}} \
+          --heap={{.Values.Heap}} \
+          --max_client_cnxns={{.Values.ClientCnxns}} \
+          --snap_retain_count={{.Values.SnapRetain}} \
+          --purge_interval={{.Values.PurgeHours}} \
+          --max_session_timeout={{.Values.MaxSessionTimeout}} \
+          --min_session_timeout={{.Values.MinSessionTimeout}} \
+          --log_level={{.Values.LogLevel}}"
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - "zookeeper-ready {{.Values.ClientPort}}"
+          initialDelaySeconds: {{.Values.ProbeInitialDelaySeconds}}
+          timeoutSeconds: {{.Values.ProbeTimeoutSeconds}}
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - "zookeeper-ready {{.Values.ClientPort}}"
+          initialDelaySeconds: {{.Values.ProbeInitialDelaySeconds}}
+          timeoutSeconds: {{.Values.ProbeTimeoutSeconds}}
+        volumeMounts:
+        - name: datadir
+          mountPath: /var/lib/zookeeper
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      volumes:
+      - name: datadir
+        emptyDir: {} 

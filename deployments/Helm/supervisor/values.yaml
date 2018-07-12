@@ -1,0 +1,9 @@
+Version: 2
+Build: 136
+Servers: 2
+
+Cpu: "1"
+Memory: "2Gi"
+
+Image: "jakkaj/stormsupervisor:latest" #this is in this repo: Storm/Docker/nimbus
+ImagePullPolicy: "IfNotPresent"

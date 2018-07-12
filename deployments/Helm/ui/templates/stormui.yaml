@@ -1,0 +1,67 @@
+{{- $root := . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: "stormui-cs-{{.Values.Version}}-{{.Values.Build}}"
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    app: "stormui-{{.Values.Version}}-{{.Values.Build}}"
+spec:
+  ports:
+  - port: 80
+    name: http  
+    targetPort: {{.Values.ServerPort}}
+  selector:
+    app: "stormui-{{.Values.Version}}-{{.Values.Build}}"
+  type: LoadBalancer
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: "stormui-{{.Values.Version}}-{{.Values.Build}}"
+  annotations:
+    helm.sh/created: {{.Release.Time.Seconds | quote }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"   
+    app: "stormui-{{.Values.Version}}-{{.Values.Build}}"
+spec: 
+  selector:
+    matchLabels:
+      app: "stormui-{{.Values.Version}}-{{.Values.Build}}"
+  replicas: {{.Values.Servers}}
+  template:
+    metadata:
+      labels:
+        app: "stormui-{{.Values.Version}}-{{.Values.Build}}"
+    spec:
+      containers:
+      - name: k8sstormui
+        imagePullPolicy: {{.Values.ImagePullPolicy}}
+        image: {{.Values.Image}}
+        resources:
+          requests:
+            memory: {{.Values.Memory}}
+            cpu: {{.Values.Cpu}}
+        ports:
+        - containerPort: {{.Values.ServerPort}}
+          name: http      
+        env:
+        - name: CONFIG_BASE
+          value: /config       
+        volumeMounts:
+          - name: application-config
+            mountPath: "/config"
+            readOnly: true
+      volumes:
+      - name: application-config
+        configMap:
+          name: app-config-{{.Values.Version}}-{{.Values.Build}}
+          items:
+          - key: nimbusnodes
+            path: nimbusnodes
+          - key: zookeepernodes
+            path: zookeepernodes

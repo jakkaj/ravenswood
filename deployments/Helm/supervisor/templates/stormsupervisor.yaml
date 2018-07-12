@@ -1,0 +1,55 @@
+{{- $root := . -}}
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: "stormsupervisor-{{.Values.Version}}-{{.Values.Build}}"
+  annotations:
+    helm.sh/created: {{.Release.Time.Seconds | quote }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"   
+    app: "stormsupervisor-{{.Values.Version}}-{{.Values.Build}}"
+spec: 
+  selector:
+    matchLabels:
+      app: "stormsupervisor-{{.Values.Version}}-{{.Values.Build}}"
+  replicas: {{.Values.Servers}}
+  template:
+    metadata:
+      labels:
+        app: "stormsupervisor-{{.Values.Version}}-{{.Values.Build}}"
+    spec:
+      containers:
+      - name: k8sstormsupervisor
+        imagePullPolicy: {{.Values.ImagePullPolicy}}
+        image: {{.Values.Image}}
+        resources:
+          requests:
+            memory: {{.Values.Memory}}
+            cpu: {{.Values.Cpu}}
+        ports:
+        - containerPort: 6700
+          name: port1 
+        - containerPort: 6701
+          name: port2
+        - containerPort: 6702
+          name: port3
+        - containerPort: 6703
+          name: port4     
+        env:
+        - name: CONFIG_BASE
+          value: /config           
+        volumeMounts:
+          - name: application-config
+            mountPath: "/config"
+            readOnly: true
+      volumes:
+      - name: application-config
+        configMap:
+          name: app-config-{{.Values.Version}}-{{.Values.Build}}
+          items:
+          - key: nimbusnodes
+            path: nimbusnodes
+          - key: zookeepernodes
+            path: zookeepernodes

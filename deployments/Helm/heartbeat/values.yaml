@@ -1,0 +1,11 @@
+Version: 1
+Build: cbademo-18
+
+Servers: 1
+
+Cpu: ".2"
+Memory: "500m"
+IsSecondCluster: false
+ImageHeartBeat: "jakkaj/monheartbeatfs:latest"
+ImageHeartMon: "jakkaj/monheartmonfs:latest"
+ImagePullPolicy: "IfNotPresent"

@@ -1,0 +1,15 @@
+Version: 2
+Build: 136
+
+ZookeeperNodes: 3
+NimbusNodes: 2
+
+
+eventhub_read_policy_key: "val_eventhub_read_policy_key"
+eventhub_read_policy_name: "val_eventhub_read_policy_name"
+eventhub_name: "val_eventhub_name"
+eventhub_namespace: "val_eventhub_namespace"
+cosmos_service_endpoint: "val_cosmos_service_endpoint"
+cosmos_key: "val_cosmos_key"
+cosmos_database_name: "val_cosmos_database_name"
+cosmos_collection_name: "val_cosmos_collection_name"

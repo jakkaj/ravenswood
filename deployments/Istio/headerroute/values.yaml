@@ -1,0 +1,7 @@
+Version: 26
+Build: 11
+TargetVersion: v1
+OtherVersion: v2
+HeaderName: stromuserSegment
+HeaderRegex: ^2$
+Svc: svc1

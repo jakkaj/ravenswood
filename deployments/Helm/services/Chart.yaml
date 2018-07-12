@@ -1,0 +1,10 @@
+name: stormenrichmentservices
+home: https://github.com/jakkaj/ravenswood
+version: "1.0"
+description: Sample services to be called from the enrichment stages
+icon: https://docs.microsoft.com/favicon.ico
+sources:
+  - https://github.com/jakkaj/ravenswood
+maintainers:
+  - name: Jordan Kight
+    email: jordan.knight@microsoft.com 

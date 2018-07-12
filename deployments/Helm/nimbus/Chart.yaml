@@ -1,0 +1,12 @@
+name: nimbus
+home: https://github.com/jakkaj/ravenswood
+version: "1.0"
+description: Nimbus chart for nimbus stateful set deployments
+icon: https://docs.microsoft.com/favicon.ico
+sources:
+  - https://github.com/jakkaj/ravenswood
+  - https://github.com/apache/zookeeper
+  - https://github.com/kow3ns/kubernetes-zookeeper
+maintainers:
+  - name: Jordan Kight
+    email: jordan.knight@microsoft.com 

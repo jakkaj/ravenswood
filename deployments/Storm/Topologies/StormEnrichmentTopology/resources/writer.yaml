@@ -1,0 +1,47 @@
+---
+# Topology that reads from Event Hubs
+name: "eventhubwriter"
+
+components:
+  # Configure the Event Hub spout
+  - id: "eventhubbolt-config"
+    className: "org.apache.storm.eventhubs.bolt.EventHubBoltConfig"
+    constructorArgs:
+      # This is populated from the .properties file when the topology is started
+      - "${eventhub_write_policy_name}"
+      - "${eventhub_write_policy_key}"
+      - "${eventhub_namespace}"
+      - ""
+      - "${eventhub_name}"
+
+spouts:
+  - id: "user-message-spout"
+    className: "cse.ravenswood.UserMessageSpout"
+    parallelism: ${eventhub_partitions}
+
+bolts:
+  - id: "eventhub-bolt"
+    className: "org.apache.storm.eventhubs.bolt.EventHubBolt"
+    constructorArgs:
+      - ref: "eventhubbolt-config" # config declared in components section
+    # parallelism hint. This should be the same as the number of partitions for your Event Hub, so we read it from the dev.properties file passed at run time.
+    parallelism: ${eventhub_partitions}
+
+  # Log information
+  - id: "log-bolt"
+    className: "org.apache.storm.flux.wrappers.bolts.LogInfoBolt"
+    parallelism: 1
+
+# How data flows through the components
+streams:
+  - name: "spout -> eventhub" # just a string used for logging
+    from: "user-message-spout"
+    to: "eventhub-bolt"
+    grouping:
+        type: SHUFFLE
+
+  - name: "spout -> logger"
+    from: "user-message-spout"
+    to: "log-bolt"
+    grouping:
+        type: SHUFFLE

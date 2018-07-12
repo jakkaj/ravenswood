@@ -1,0 +1,10 @@
+name: HeartBeat making service
+home: https://github.com/jakkaj/ravenswood
+version: "1.0"
+description: Heart beat monitoring systems
+icon: https://docs.microsoft.com/favicon.ico
+sources:
+  - https://github.com/jakkaj/ravenswood 
+maintainers:
+  - name: Jordan Kight
+    email: jordan.knight@microsoft.com 

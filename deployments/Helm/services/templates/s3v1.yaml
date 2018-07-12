@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "svc3-{{.Values.Version}}-{{.Values.Build}}"
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    app: "svc3-{{.Values.Version}}-{{.Values.Build}}"
+spec:
+  ports:
+  - port: 80
+    name: http  
+    targetPort: 80
+  selector:
+    app: "svc3-{{.Values.Version}}-{{.Values.Build}}"
+
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: "svc3-v1-{{.Values.Version}}-{{.Values.Build}}"
+  annotations:
+    helm.sh/created: {{.Release.Time.Seconds | quote }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"   
+    app: "svc3-{{.Values.Version}}-{{.Values.Build}}"
+spec: 
+  selector:
+    matchLabels:
+      app: "svc3-{{.Values.Version}}-{{.Values.Build}}"
+      version: v1
+  replicas: {{.Values.Servers}}
+  template:
+    metadata:
+      labels:
+        app: "svc3-{{.Values.Version}}-{{.Values.Build}}"
+        version: v1
+    spec:
+      containers:
+      - name: svc
+        imagePullPolicy: {{.Values.ImagePullPolicy}}
+        image: {{.Values.ImageOther}}
+        resources:
+          requests:
+            memory: {{.Values.Memory}}
+            cpu: {{.Values.Cpu}}
+        ports:
+        - containerPort: 80
+          name: http      
+        env:
+        - name: WRITE_BACK
+          value: svc3v1     
+        - name: WRITE_FIELD
+          value: svc3
+        - name: CLUSTER
+          valueFrom:
+            configMapKeyRef:                 
+              name: ravenswoodconfig                 
+              key: this_cluster 

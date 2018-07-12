@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-headless
+  labels:
+    app: echoer
+spec:
+  ports:
+  - port: 8001
+    name: server 
+  clusterIP: None
+  selector:
+    app: echoer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-client
+  labels:
+    app: echoer
+spec:
+  ports:
+  - port: 8001
+    name: client
+  selector:
+    app: echoer
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: echoer
+spec:
+  selector:
+    matchLabels:
+      app: echoer
+  serviceName: svc-headless
+  replicas: 3
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        app: echoer
+    spec:     
+      containers:
+      - name: echoer
+        imagePullPolicy: Always
+        image: "jakkaj/basic-env-write:latest"   
+        ports:    
+        - containerPort: 8001
+          name: client

@@ -1,0 +1,10 @@
+Version: 6
+Build: cbademo-18
+
+Servers: 1
+
+Cpu: ".5"
+Memory: "500m"
+Image: "jakkaj/svca:latest"
+ImageOther: "jakkaj/svcb:latest"
+ImagePullPolicy: "IfNotPresent"

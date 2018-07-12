@@ -1,0 +1,14 @@
+Version: 2
+Build: 136
+Servers: 2
+DRPC_Port: 3772
+Thrift_Port: 6627
+Cpu: "0.5"
+Memory: "1Gi"
+
+Image: "jakkaj/nimbus:latest" #this is in this repo: Storm/Docker/nimbus
+#ImagePullPolicy: "Always"
+ImagePullPolicy: "IfNotPresent"
+AntiAffinity: "soft"
+UpdateStrategy: RollingUpdate
+MaxUnavailable: 1

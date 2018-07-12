@@ -1,0 +1,51 @@
+
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: "hearts-{{.Values.Version}}-{{.Values.Build}}"
+  annotations:
+    helm.sh/created: {{.Release.Time.Seconds | quote }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    #chart: "{{.Chart.Name}}-{{.Chart.Version}}"   
+    app: "hearts-{{.Values.Version}}-{{.Values.Build}}"
+spec: 
+  selector:
+    matchLabels:
+      app: "hearts-{{.Values.Version}}-{{.Values.Build}}"      
+  replicas: {{.Values.Servers}}
+  template:
+    metadata:
+      labels:
+        app: "hearts-{{.Values.Version}}-{{.Values.Build}}"        
+    spec:
+      containers:
+      - name: heartbeat
+        imagePullPolicy: {{.Values.ImagePullPolicy}}
+        image: {{.Values.ImageHeartBeat}}
+        resources:
+          requests:
+            memory: {{.Values.Memory}}
+            cpu: {{.Values.Cpu}}      
+        env:
+        - name: HEART_BEAT_FOLDER
+          value: /hb/v{{.Values.Version}}-{{.Values.Build}}
+        - name: THIS_CLUSTER
+          valueFrom:
+            configMapKeyRef:                 
+              name: ravenswoodconfig                 
+              key: this_cluster
+        - name: THAT_CLUSTER
+          valueFrom:
+            configMapKeyRef:                 
+              name: ravenswoodconfig                 
+              key: other_cluster
+        volumeMounts:
+        - mountPath: /hb
+          name: hbvolume      
+        
+      volumes:
+      - name: hbvolume
+        persistentVolumeClaim:
+          claimName: azurefilecustom

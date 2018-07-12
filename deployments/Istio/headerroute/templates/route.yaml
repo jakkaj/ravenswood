@@ -1,0 +1,21 @@
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: vs-{{.Values.Svc}}-{{.Values.Version}}-{{.Values.Build}}
+spec:
+  hosts:
+  - {{.Values.Svc}}-{{.Values.Version}}-{{.Values.Build}}
+  http:
+  - match:   
+    - headers:
+        {{.Values.HeaderName}}:
+          regex: {{.Values.HeaderRegex}}
+    route:
+    - destination:
+        host: {{.Values.Svc}}-{{.Values.Version}}-{{.Values.Build}}
+        subset: {{.Values.TargetVersion}}
+  - route:
+    - destination:
+        host: {{.Values.Svc}}-{{.Values.Version}}-{{.Values.Build}}
+        subset: {{.Values.OtherVersion}}

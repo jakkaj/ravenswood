@@ -1,0 +1,133 @@
+{{- $root := . -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "nimbus-hs-{{.Values.Version}}-{{.Values.Build}}"
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "nimbus-{{.Values.Version}}-{{.Values.Build}}"
+spec:
+  ports:
+  - port: {{.Values.DRPC_Port}}
+    name: drpc
+  - port: {{.Values.Thrift_Port}}
+    name: thrift
+  clusterIP: None
+  selector:
+    component: "nimbus-{{.Values.Version}}-{{.Values.Build}}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "nimbus-cs-{{.Values.Version}}-{{.Values.Build}}"
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "nimbus-{{.Values.Version}}-{{.Values.Build}}"
+spec:
+  ports:
+  - port: {{.Values.DRPC_Port}}
+    name: drpc
+  - port: {{.Values.Thrift_Port}}
+    name: thrift
+  selector:
+    component: "nimbus-{{.Values.Version}}-{{.Values.Build}}"
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: "nimbus-pdb-{{.Values.Version}}-{{.Values.Build}}"
+  annotations:
+    helm.sh/created: {{.Release.Time.Seconds | quote }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "nimbus-{{.Values.Version}}-{{.Values.Build}}"
+spec:
+  selector:
+    matchLabels:
+      component: "nimbus-{{.Values.Version}}-{{.Values.Build}}"
+  maxUnavailable: {{.Values.MaxUnavailable}}
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: "nimbus-{{.Values.Version}}-{{.Values.Build}}"
+  annotations:
+    helm.sh/created: {{.Release.Time.Seconds | quote }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    component: "nimbus-{{.Values.Version}}-{{.Values.Build}}"
+spec:
+  serviceName: "nimbus-hs-{{.Values.Version}}-{{.Values.Build}}"
+  replicas: {{.Values.Servers}}
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: {{.Values.UpdateStrategy}}
+  template:
+    metadata:
+      labels:
+        component: "nimbus-{{.Values.Version}}-{{.Values.Build}}"
+    spec:
+      {{- if eq .Values.AntiAffinity "hard"}}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "component"
+                    operator: In
+                    values:
+                    - "nimbus-{{.Values.Version}}-{{.Values.Build}}"
+              topologyKey: "kubernetes.io/hostname"
+      {{- else if eq .Values.AntiAffinity "soft"}}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+             - weight: 1
+               podAffinityTerm:
+                 labelSelector:
+                    matchExpressions:
+                      - key: "component"
+                        operator: In
+                        values:
+                         - "nimbus-{{.Values.Version}}-{{.Values.Build}}"
+                 topologyKey: "kubernetes.io/hostname"
+      {{- end}}
+      containers:
+      - name: k8snimbus
+        imagePullPolicy: {{.Values.ImagePullPolicy}}
+        image: {{.Values.Image}}
+        resources:
+          requests:
+            memory: {{.Values.Memory}}
+            cpu: {{.Values.Cpu}}
+        ports:
+        - containerPort: {{.Values.DRPC_Port}}
+          name: drpc
+        - containerPort: {{.Values.Thrift_Port}}
+          name: thrift    
+        env:
+        - name: CONFIG_BASE
+          value: /config        
+        volumeMounts:
+         - name: application-config
+           mountPath: "/config"
+           readOnly: true
+      volumes:
+      - name: application-config
+        configMap:
+          name: app-config-{{.Values.Version}}-{{.Values.Build}}
+          items:
+          - key: nimbusnodes
+            path: nimbusnodes
+          - key: zookeepernodes
+            path: zookeepernodes
+        

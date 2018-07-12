@@ -1,0 +1,104 @@
+---
+# Topology that reads from Event Hubs and enriches the data via Web Services
+name: "eventhubenricher"
+
+components:
+  # Configure the Event Hub spout
+  - id: "eventhubspout-config"
+    className: "org.apache.storm.eventhubs.spout.EventHubSpoutConfig"
+    constructorArgs:
+      # These are populated from the .properties file when the topology is started
+      - "${eventhub_read_policy_name}"
+      - "${eventhub_read_policy_key}"
+      - "${eventhub_namespace}"
+      - "${eventhub_name}"
+      - ${eventhub_partitions}
+
+# Spout to read from eventhub
+spouts:
+  - id: "eventhub-spout"
+    className: "org.apache.storm.eventhubs.spout.EventHubSpout"
+    constructorArgs:
+      - ref: "eventhubspout-config" # config declared in components section
+    # parallelism hint. This should be the same as the number of partitions for your Event Hub, so we read it from the dev.properties file passed at run time.
+    parallelism: ${eventhub_partitions}
+
+bolts:
+  # Log information
+  - id: "log-bolt"
+    className: "org.apache.storm.flux.wrappers.bolts.LogInfoBolt"
+    parallelism: 1
+
+  # Writes to cosmos information
+  - id: "cosmos-writer-bolt"
+    className: "cse.ravenswood.CosmosWriterBolt"
+    constructorArgs:
+      - "${cosmos_service_endpoint}"
+      - "${cosmos_key}"
+      - "${cosmos_database_name}"
+      - "${cosmos_collection_name}"
+    parallelism: 1
+
+  # Parses from JSON into tuples
+  - id: "parser-bolt"
+    className: "cse.ravenswood.ParserBolt"
+    parallelism: ${eventhub_partitions}
+
+  # Enriches the data
+  - id: "enrich-bolt-1"
+    className: "cse.ravenswood.EnrichBolt"
+    constructorArgs:
+      - "${enrich_url1}"
+    parallelism: ${eventhub_partitions}
+
+  # Enriches the data
+  - id: "enrich-bolt-2"
+    className: "cse.ravenswood.EnrichBolt"
+    constructorArgs:
+      - "${enrich_url2}"
+    parallelism: ${eventhub_partitions}
+
+  # Enriches the data
+  - id: "enrich-bolt-3"
+    className: "cse.ravenswood.EnrichBolt"
+    constructorArgs:
+      - "${enrich_url3}"
+    parallelism: ${eventhub_partitions}
+
+# How data flows through the components
+streams:
+  - name: "spout -> parser" # just a string used for logging
+    from: "eventhub-spout"
+    to: "parser-bolt"
+    grouping:
+      type: SHUFFLE
+
+  - name: "parser -> enrich 1" 
+    from: "parser-bolt"
+    to: "enrich-bolt-1"
+    grouping:
+      type: SHUFFLE
+
+  - name: "enrich 1 -> enrich 2" 
+    from: "enrich-bolt-1"
+    to: "enrich-bolt-2"
+    grouping:
+      type: SHUFFLE
+
+  - name: "enrich 2 -> enrich 3" 
+    from: "enrich-bolt-2"
+    to: "enrich-bolt-3"
+    grouping:
+      type: SHUFFLE
+
+  - name: "enrich 3 -> cosmos" 
+    from: "enrich-bolt-3"
+    to: "cosmos-writer-bolt"
+    grouping:
+      type: SHUFFLE
+
+  - name: "parser -> log-bolt" 
+    from: "enrich-bolt-3"
+    to: "log-bolt"
+    grouping:
+      type: SHUFFLE

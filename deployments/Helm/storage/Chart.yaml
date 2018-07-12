@@ -1,0 +1,10 @@
+name: storage stuff
+home: https://github.com/jakkaj/ravenswood
+version: "1.0"
+description: Storage for a deployment
+icon: https://docs.microsoft.com/favicon.ico
+sources:
+  - https://github.com/jakkaj/ravenswood  
+maintainers:
+  - name: Jordan Kight
+    email: jordan.knight@microsoft.com 

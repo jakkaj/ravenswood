@@ -1,0 +1,13 @@
+{{- $root := . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: app-config-{{.Values.Version}}-{{.Values.Build}}
+ namespace: default
+data:
+  nimbusnodes: | {{range $i, $e := until (int .Values.NimbusNodes)}}
+    - nimbus-{{$root.Values.Version}}-{{$root.Values.Build}}-{{$i}}.nimbus-hs-{{$root.Values.Version}}-{{$root.Values.Build}}.default.svc.cluster.local
+    {{- end }} 
+  zookeepernodes: | {{range $i, $e := until (int .Values.ZookeeperNodes)}}
+    - zk-{{$root.Values.Version}}-{{$root.Values.Build}}-{{$i}}.zk-hs-{{$root.Values.Version}}-{{$root.Values.Build}}.default.svc.cluster.local
+    {{- end }} 

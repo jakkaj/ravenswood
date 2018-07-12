@@ -1,0 +1,128 @@
+{{- $root := . -}}
+{{- $expandver := printf "%v-%v" .Values.Version .Values.Build -}}
+{{- $secretname := printf "%s-%s" "app-secrets" $expandver -}}
+
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: "stormtoplogy-{{.Values.Version}}-{{.Values.Build}}"
+  annotations:
+    helm.sh/created: {{.Release.Time.Seconds | quote }}
+  labels:
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"   
+    app: "stormtoplogy-{{.Values.Version}}-{{.Values.Build}}"
+spec:
+  restartPolicy: Never
+  initContainers:
+  - name: heartmon
+    imagePullPolicy: {{.Values.ImagePullPolicy}}
+    image: {{.Values.ImageHeartMon}}
+    resources:
+      requests:
+        memory: {{.Values.Memory}}
+        cpu: {{.Values.Cpu}}      
+    env:
+    - name: HEART_BEAT_FOLDER
+      value: /hb/v{{.Values.Version}}-{{.Values.Build}}
+    - name: THIS_CLUSTER
+      valueFrom:
+        configMapKeyRef:                 
+          name: ravenswoodconfig                 
+          key: this_cluster
+    - name: THAT_CLUSTER
+      valueFrom:
+        configMapKeyRef:                 
+          name: ravenswoodconfig                 
+          key: other_cluster
+    volumeMounts:
+    - mountPath: /hb
+      name: hbvolume  
+  containers:
+  - name: k8sstormtoplogy
+    imagePullPolicy: {{.Values.ImagePullPolicy}}
+    image: {{.Values.Image}}
+    resources:
+      requests:
+        memory: {{.Values.Memory}}
+        cpu: {{.Values.Cpu}}        
+    env:
+    - name: eventhub_read_policy_name
+      valueFrom:
+          secretKeyRef:
+            name: {{$secretname}}
+            key: eventhub_read_policy_name
+    - name: eventhub_read_policy_key
+      valueFrom:
+          secretKeyRef:
+            name: {{$secretname}}
+            key: eventhub_read_policy_key
+    - name: eventhub_namespace
+      valueFrom:
+          secretKeyRef:
+            name: {{$secretname}}
+            key: eventhub_namespace
+    - name: eventhub_name
+      valueFrom:
+          secretKeyRef:
+            name: {{$secretname}}
+            key: eventhub_name
+    - name: cosmos_service_endpoint
+      valueFrom:
+          secretKeyRef:
+            name: {{$secretname}}
+            key: cosmos_service_endpoint
+    - name: cosmos_key
+      valueFrom:
+          secretKeyRef:
+            name: {{$secretname}}
+            key: cosmos_key
+    - name: cosmos_database_name
+      valueFrom:
+          secretKeyRef:
+            name: {{$secretname}}
+            key: cosmos_database_name
+    - name: cosmos_collection_name
+      valueFrom:
+          secretKeyRef:
+            name: {{$secretname}}
+            key: cosmos_collection_name   
+
+
+    - name: CONFIG_BASE
+      value: /config
+    - name: cosmoswriterbolt_parallelism
+      value: {{.Values.cosmoswriterbolt_parallelism | quote}}
+    - name: enrichbolt_parallelism
+      value: {{.Values.enrichbolt_parallelism | quote}}
+    - name: eventhub_partitions
+      value: "{{.Values.eventhub_partitions}}"
+    - name: enrichbolt_parallelism
+      value: "{{.Values.enrichbolt_parallelism}}"
+    - name: cosmoswriterbolt_parallelism
+      value: "{{.Values.cosmoswriterbolt_parallelism}}"
+    - name: enrich_url1
+      value: http://svc1-{{.Values.Version}}-{{.Values.Build}}/api/enrich
+    - name: enrich_url2
+      value: http://svc2-{{.Values.Version}}-{{.Values.Build}}/api/enrich
+    - name: enrich_url3
+      value: http://svc3-{{.Values.Version}}-{{.Values.Build}}/api/enrich
+    - name: topology_name
+      value: {{.Values.topology_name}}
+    volumeMounts:
+          - name: application-config
+            mountPath: "/config"
+            readOnly: true
+  volumes:
+  - name: application-config
+    configMap:
+      name: app-config-{{.Values.Version}}-{{.Values.Build}}
+      items:
+      - key: nimbusnodes
+        path: nimbusnodes
+      - key: zookeepernodes
+        path: zookeepernodes  
+  - name: hbvolume
+    persistentVolumeClaim:
+      claimName: azurefilecustom  

@@ -1,0 +1,122 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>cse.ravenswood</groupId>
+  <artifactId>StormEnrichmentTopology</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>StormEnrichmentTopology</name>
+  <url>http://maven.apache.org</url>
+  <properties>
+    <storm.version>1.2.2</storm.version>
+    <storm.eventhub.version>1.2.2</storm.eventhub.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.storm</groupId>
+      <artifactId>storm-core</artifactId>
+      <version>${storm.version}</version>
+      <!-- keep storm out of the jar-with-dependencies -->
+      <scope>provided</scope>
+    </dependency>
+    <!-- Flux, for YAML based topologies -->
+    <dependency>
+      <groupId>org.apache.storm</groupId>
+      <artifactId>flux-core</artifactId>
+      <version>${storm.version}</version>
+    </dependency>
+    <!--For working with Event Hubs-->
+    <dependency>
+      <groupId>org.apache.storm</groupId>
+      <artifactId>storm-eventhubs</artifactId>
+      <version>${storm.eventhub.version}</version>
+    </dependency>
+    <!-- For working with JSON -->
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20140107</version>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.azure</groupId>
+      <artifactId>azure-documentdb</artifactId>
+      <version>1.16.1</version>
+    </dependency>
+    <!-- Easy HTTP calls -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>3.10.0</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <!-- build for Java 1.8-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+      <!-- build an uber jar -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+          <transformers>
+            <!-- Keep us from getting a can't overwrite file error -->
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+            <!-- Keep us from getting errors when trying to use WASB from the storm-hdfs bolt -->
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+          </transformers>
+          <!-- Keep us from getting a bad signature error -->
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+              <excludes>
+                <exclude>META-INF/*.SF</exclude>
+                <exclude>META-INF/*.DSA</exclude>
+                <exclude>META-INF/*.RSA</exclude>
+              </excludes>
+            </filter>
+
+            <filter>
+              <artifact>org.apache.storm:flux-core</artifact>
+              <excludes>
+                <exclude>org/apache/http/**</exclude>
+              </excludes>
+            </filter>
+          </filters>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+    <!-- Tell the project about the configuration files For
+         Event Hub and the Azure Storage account -->
+    <resources>
+      <resource>
+        <directory>${basedir}/resources</directory>
+        <filtering>false</filtering>
+        <!-- include the topology definitions & logging config -->
+        <includes>
+          <include>enricher.yaml</include>
+          <include>enricher-env.yaml</include>
+          <include>reader.yaml</include>
+          <include>writer.yaml</include>
+          <include>log4j2.xml</include>
+        </includes>
+      </resource>
+    </resources>
+  </build>
+</project>

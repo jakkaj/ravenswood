@@ -1,0 +1,228 @@
+---
+# Source: HeartBeat making service/templates/heartsystems.yaml
+
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: "hearts-4-136"
+  annotations:
+    helm.sh/created: "1530402919"
+  labels:
+    heritage: "Tiller"
+    release: "RELEASE-NAME"
+    chart: "HeartBeat making service-1.0"   
+    app: "hearts-4-136"
+spec: 
+  selector:
+    matchLabels:
+      app: "hearts-4-136"      
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "hearts-4-136"        
+    spec:
+      containers:
+      - name: heartbeat
+        imagePullPolicy: IfNotPresent
+        image: jakkaj/monheartbeatfs:latest
+        resources:
+          requests:
+            memory: 500m
+            cpu: .2      
+        env:
+        - name: HEART_BEAT_FOLDER
+          value: /hb/v4-136
+        - name: THIS_CLUSTER
+             valueFrom:
+               configMapKeyRef:                 
+                 name: ravenswoodconfig                 
+                 key: this_cluster
+        - name: THAT_CLUSTER
+             valueFrom:
+               configMapKeyRef:                 
+                 name: ravenswoodconfig                 
+                 key: that_cluster
+        volumeMounts:
+        - mountPath: /hb
+          name: hbvolume
+      - name: heartmon
+        imagePullPolicy: IfNotPresent
+        image: jakkaj/monheartmonfs:latest
+        resources:
+          requests:
+            memory: 500m
+            cpu: .2      
+        env:
+        - name: HEART_BEAT_FOLDER
+          value: /hb/v4-136
+        - name: THIS_CLUSTER
+             valueFrom:
+               configMapKeyRef:                 
+                 name: ravenswoodconfig                 
+                 key: this_cluster
+        - name: THAT_CLUSTER
+             valueFrom:
+               configMapKeyRef:                 
+                 name: ravenswoodconfig                 
+                 key: that_cluster
+        volumeMounts:
+        - mountPath: /hb
+          name: hbvolume  
+        
+      volumes:
+      - name: hbvolume
+        persistentVolumeClaim:
+          claimName: azurefilecustom
+---
+# Source: HeartBeat making service/templates/heartsystems.yaml
+
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: "hearts-4-136"
+  annotations:
+    helm.sh/created: "1530402980"
+  labels:
+    heritage: "Tiller"
+    release: "RELEASE-NAME"
+    chart: "HeartBeat making service-1.0"   
+    app: "hearts-4-136"
+spec: 
+  selector:
+    matchLabels:
+      app: "hearts-4-136"      
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "hearts-4-136"        
+    spec:
+      containers:
+      - name: heartbeat
+        imagePullPolicy: IfNotPresent
+        image: jakkaj/monheartbeatfs:latest
+        resources:
+          requests:
+            memory: 500m
+            cpu: .2      
+        env:
+        - name: HEART_BEAT_FOLDER
+          value: /hb/v4-136
+        - name: THIS_CLUSTER
+            valueFrom:
+              configMapKeyRef:                 
+                name: ravenswoodconfig                 
+                key: this_cluster
+        - name: THAT_CLUSTER
+            valueFrom:
+              configMapKeyRef:                 
+                name: ravenswoodconfig                 
+                key: that_cluster
+        volumeMounts:
+        - mountPath: /hb
+          name: hbvolume
+      - name: heartmon
+        imagePullPolicy: IfNotPresent
+        image: jakkaj/monheartmonfs:latest
+        resources:
+          requests:
+            memory: 500m
+            cpu: .2      
+        env:
+        - name: HEART_BEAT_FOLDER
+          value: /hb/v4-136
+        - name: THIS_CLUSTER
+            valueFrom:
+              configMapKeyRef:                 
+                name: ravenswoodconfig                 
+                key: this_cluster
+        - name: THAT_CLUSTER
+            valueFrom:
+              configMapKeyRef:                 
+                name: ravenswoodconfig                 
+                key: that_cluster
+        volumeMounts:
+        - mountPath: /hb
+          name: hbvolume  
+        
+      volumes:
+      - name: hbvolume
+        persistentVolumeClaim:
+          claimName: azurefilecustom
+---
+# Source: HeartBeat making service/templates/heartsystems.yaml
+
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: "hearts-4-136"
+  annotations:
+    helm.sh/created: "1530403121"
+  labels:
+    heritage: "Tiller"
+    release: "RELEASE-NAME"
+    chart: "HeartBeat making service-1.0"   
+    app: "hearts-4-136"
+spec: 
+  selector:
+    matchLabels:
+      app: "hearts-4-136"      
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "hearts-4-136"        
+    spec:
+      containers:
+      - name: heartbeat
+        imagePullPolicy: IfNotPresent
+        image: jakkaj/monheartbeatfs:latest
+        resources:
+          requests:
+            memory: 500m
+            cpu: .2      
+        env:
+        - name: HEART_BEAT_FOLDER
+          value: /hb/v4-136
+        - name: THIS_CLUSTER
+          valueFrom:
+            configMapKeyRef:                 
+              name: ravenswoodconfig                 
+              key: this_cluster
+        - name: THAT_CLUSTER
+          valueFrom:
+            configMapKeyRef:                 
+              name: ravenswoodconfig                 
+              key: that_cluster
+        volumeMounts:
+        - mountPath: /hb
+          name: hbvolume
+      - name: heartmon
+        imagePullPolicy: IfNotPresent
+        image: jakkaj/monheartmonfs:latest
+        resources:
+          requests:
+            memory: 500m
+            cpu: .2      
+        env:
+        - name: HEART_BEAT_FOLDER
+          value: /hb/v4-136
+        - name: THIS_CLUSTER
+          valueFrom:
+            configMapKeyRef:                 
+              name: ravenswoodconfig                 
+              key: this_cluster
+        - name: THAT_CLUSTER
+          valueFrom:
+            configMapKeyRef:                 
+              name: ravenswoodconfig                 
+              key: that_cluster
+        volumeMounts:
+        - mountPath: /hb
+          name: hbvolume  
+        
+      volumes:
+      - name: hbvolume
+        persistentVolumeClaim:
+          claimName: azurefilecustom

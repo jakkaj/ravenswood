@@ -1,0 +1,12 @@
+{
+    "ver":"1",
+    "build": "yourbuild",
+    "eventhub_read_policy_key": "create here: https://ms.portal.azure.com/#create/Microsoft.EventHub | will look like a weird string of garbage",
+    "eventhub_read_policy_name": "reader",
+    "eventhub_name": "stormc",
+    "eventhub_namespace": "your hub namespace (main name of hub)",
+    "cosmos_service_endpoint": "Create here: https://ms.portal.azure.com/#create/Microsoft.DocumentDB | thing you need looks like this -> https://xxxx.documents.azure.com:443/",
+    "cosmos_key": "<yourkey>",
+    "cosmos_database_name": "testdb",
+    "cosmos_collection_name": "testcollection2"
+}

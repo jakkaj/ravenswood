@@ -1,0 +1,37 @@
+Version: 3
+Build: cbademo-18
+
+Cpu: ".5"
+Memory: "1Gi"
+
+topology_name: "my-topology"
+
+
+
+enrichbolt_parallelism: "8"
+cosmoswriterbolt_parallelism: "8"
+
+eventhub_read_policy_key: "xxx"
+eventhub_name: "stormc"
+eventhub_namespace: "xxx"
+
+eventhub_partitions: "2"
+enrichbolt_parallelism: "2"
+
+#New DB
+cosmoswriterbolt_parallelism: "2"
+cosmos_service_endpoint: "xxx"
+cosmos_key: "xxx"
+
+cosmos_database_name: "testdb"
+cosmos_collection_name: "testcollection2"
+
+enrich_url1: "xxx"
+enrich_url2: "xxx"
+enrich_url3: "xxx"
+
+
+ImageHeartMon: "jakkaj/monheartmonfs:latest"
+Image: "jakkaj/stormtopology:latest"
+
+ImagePullPolicy: "IfNotPresent"
