@@ -182,7 +182,3 @@ Clusters can be configured to automatically modify deployments to add features t
 
 ### Data Migration
 Whilst data import is supported using standard tooling such as cqlsh,  large data volumes would need special consideration for enterprise scale tooling. For this task we recommend the Azure Data Factory. ADF is an enterprise grade integration service for moving and modifying large sets of data. 
-
-This tool would be in an excellent position to move the bulky 17TB of data that resides in the existing Cassandra cluster. 
-
-NOTE: The actual migration flow would need further design consideration that is outside the scope of this document. This next section is just a potential solution. 
