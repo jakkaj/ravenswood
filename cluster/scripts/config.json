@@ -1,0 +1,8 @@
+{
+    "ver":"somedemo-1",
+    "subscription": "<your subs id> | will look like a guid",
+    "loca": "Syd",
+    "locb": "Melb",
+    "a_location": "australiaeast",
+    "b_location": "australiasoutheast"
+}

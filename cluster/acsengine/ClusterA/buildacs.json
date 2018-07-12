@@ -1,0 +1,47 @@
+
+{
+  "apiVersion": "vlabs",
+  "properties": {
+    "orchestratorProfile": {
+      "orchestratorType": "Kubernetes",
+      "orchestratorRelease": "1.9",
+      "kubernetesConfig": {
+        "apiServerConfig": {
+          "--admission-control": "NamespaceLifecycle,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,AlwaysPullImages"
+        },
+        "networkPolicy": "azure"
+      } 
+    },
+    "masterProfile": {
+      "count": 1,
+      "dnsPrefix": "Ravenswood-Melb-92",
+      "vmSize": "Standard_D2_v2",
+      "vnetSubnetId": "/subscriptions/e39a92b5-b9a4-43d1-97a3-c31c819a583a/resourceGroups/Ravenswood-Melb-91/providers/Microsoft.Network/virtualNetworks/RavneswoodVnet_Ravenswood-Melb-91/subnets/default",
+      "firstConsecutiveStaticIP": "192.168.201.239",
+      "vnetCidr": "192.168.201.0/24"
+    },
+    "agentPoolProfiles": [
+          {
+        "name": "linuxpool1",
+        "count": 6,
+        "vmSize": "Standard_D4_v3",
+        "availabilityProfile": "AvailabilitySet",
+        "vnetSubnetId": "/subscriptions/e39a92b5-b9a4-43d1-97a3-c31c819a583a/resourceGroups/Ravenswood-Melb-91/providers/Microsoft.Network/virtualNetworks/RavneswoodVnet_Ravenswood-Melb-91/subnets/default"      
+    }
+    ],
+    "linuxProfile": {
+      "adminUsername": "azureuser",
+      "ssh": {
+        "publicKeys": [
+          {
+            "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/+QeWJ4aah5T1fCDCALeyEJ7kAyIRQqhnJ4NwOcVTnXYt7GybXnbIxWoTWf14S0u/yKEvAgqc7J2yTweyaLLG7V7nfJF0dytYj3H616Mzi469RcV+iUvLO9Kj4DAsiqpLF5QkagbTZuFrerrbJRGVNgwyPp5R2fi9pluzuFLE56Ypv1dmfNtZgN5VnVHhCZ3Hoe9DNjwpebVZqFX+qT1RGJeN97sTWlXKBve3PQMu7nlWyuWQCIuNThrg+1FovP5zMxc5TDsmc/LGleZYMBUHNpOgdW0o+p97dgPW4VRO+R47L7tl3kkD8ohtn1pCBwyxY0hhDcS+WlLX7fkGr11L jak@precisejak"
+          }
+        ]
+      }
+    },
+    "servicePrincipalProfile": {
+      "clientId": "<client guid>",
+      "secret": "<client secret>"
+    }
+  }
+}

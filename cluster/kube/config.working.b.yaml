@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: ravenswoodconfig
+ namespace: default
+data:
+  storage: "sravenswoodsydcba"
+  a_resourceGroup: "Ravenswood-Syd-cbademo-18"
+  b_resourceGroup: "Ravenswood-Melb-cbademo-18"
+  this_cluster: "b"
+  other_cluster: "a"

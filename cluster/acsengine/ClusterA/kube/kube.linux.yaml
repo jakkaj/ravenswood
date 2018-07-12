@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: linuxsvc
+spec:
+  ports:
+  - port: 80 
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: linuxapp
+  type: LoadBalancer
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: linux-deployment
+spec:
+  selector:
+    matchLabels:
+      app: linuxapp
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: linuxapp
+    spec:
+      containers:
+      - name: linuxappmaincontainer
+        image: jakkaj/basicaspnet:1 # Update the version of nginx from 1.7.9 to 1.8
+        ports:
+        - containerPort: 80
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+

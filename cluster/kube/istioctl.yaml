@@ -1,0 +1,44 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: windowsnet
+spec:
+  hosts:
+  - "*.windows.net"  
+  ports:
+  - number: 443
+    name: port
+    protocol: TCP
+  - number: 5672
+    name: aqmpa
+    protocol: TCP
+  - number: 5671
+    name: aqmpb
+    protocol: TCP
+  
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: cosmos
+spec:
+  hosts:
+  - "*.azure.com"  
+  ports:
+  - number: 443
+    name: port
+    protocol: TCP
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: testservices
+spec:
+  hosts:
+  - "13.76.1.109" 
+  - "52.230.64.147" 
+  - "137.116.151.114" 
+  ports:
+  - number: 8001
+    name: http
+    protocol: HTTP
