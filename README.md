@@ -81,11 +81,11 @@ One of the most powerful design features of K8S is its ability to separate out a
 
 In this regard deployed software is decoupled from the environment, it does not need to know a range of concepts that are taken care of by the cluster such as security, intelligent routing, access control, configuration management and more. 
 
-Furthermore, the K8S cluster can be locked down thus abstracting main code and deployment security aspects away from code running in the cluster. Clusters can be restricted, “admission controllers” can ensure only allowed containers and configs are ever applied to the cluster and container registries can be locked down, so the cluster will only pull from trusted sources. Code and containers can be signed and verified, and services running in the cluster can have their identities verified by certificates.
+Furthermore, the K8S cluster can be locked down thus abstracting main code and deployment security aspects away from code running in the cluster. Clusters can be restricted, "[admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)" can ensure only allowed containers and configs are ever applied to the cluster and container registries can be locked down, so the cluster will only pull from trusted sources. Code and containers can be signed and verified, and services running in the cluster can have their identities verified by certificates.
 
 ### Highly available cluster nodes
 
-Azure has a feature called availability sets which help across a range of HA concepts including server updates as well as unplanned downtime. Servers in different availability sets are spaced across different network, power and physical server racks to separate their physical infrastructure.  Nodes in AKS clusters are automatically created in across two availability sets. 
+Azure has a feature called [availability sets](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/manage-availability) which help across a range of HA concepts including server updates as well as unplanned downtime. Servers in different availability sets are spaced across different network, power and physical server racks to separate their physical infrastructure.  Nodes in AKS clusters are automatically created in across two availability sets. 
 
 ### Immutable deployments 
 
@@ -150,7 +150,7 @@ The system can be re-deployed as a “test version” that sits side by side the
 Once the stream of data is taken up in to Azure Event Hubs, the data can be accessed by many different consumer groups, meaning a test system can access the stream independently from the production system without placing extra load on the original event emitting systems. 
 
 ### Azure Cosmos DB can write to a second +more database in real time
-Using a method called the “change feed”, a Cosmos DB can be configured to write to a second Cosmos database in real-time. See https://docs.microsoft.com/en-us/azure/cosmos-db/lambda-architecture and https://docs.microsoft.com/en-us/azure/cosmos-db/change-feed. 
+Using a method called the “change feed”, a Cosmos DB can be configured to write to a second Cosmos database in real-time. See [https://docs.microsoft.com/en-us/azure/cosmos-db/lambda-architecture](https://docs.microsoft.com/en-us/azure/cosmos-db/lambda-architecture) and [https://docs.microsoft.com/en-us/azure/cosmos-db/change-feed](https://docs.microsoft.com/en-us/azure/cosmos-db/change-feed). 
 - Change feed enables Lambda Architecture scenarios for experimentation
 - Second database can be used as a read only system with a different configuration
 - N database can be added in the future as the change feed can be back read from collection creation 
@@ -162,14 +162,14 @@ One of the most important aspects to developer experience is the code-> run -> r
 The concepts that are used to create the experimentation pipe can be used to create staging/testing environments which can be tested using real data before new components are promoted to production. 
 
 ### Spark can use the second pipe and database
-Regardless of how the data gets in to a second non-production database (change feed or replica storm pipe) a Spark environment can be set up either in the K8S cluster or by using the PaaS HDInsight Spark service. This can then be used to further experiment on data without needing to modify the production data set. See https://docs.microsoft.com/en-us/azure/hdinsight/spark/apache-spark-overview for more information. 
+Regardless of how the data gets in to a second non-production database (change feed or replica storm pipe) a Spark environment can be set up either in the K8S cluster or by using the PaaS HDInsight Spark service. This can then be used to further experiment on data without needing to modify the production data set. See [https://docs.microsoft.com/en-us/azure/hdinsight/spark/apache-spark-overview](https://docs.microsoft.com/en-us/azure/hdinsight/spark/apache-spark-overview) for more information. 
 
 ## Security Considerations
 ### Managed Service Identities
-Managed Service Identities are a system backed by Azure Active Directory that assigns an identity to services, including those running within AKS. This identity can then be given permission to Azure Services such as Azure KeyVault. This provides a neat and abstracted way to “seed” the first step in the security chain – something somewhere needs to initiate access and have keys to the system. No credentials are needed in code or in app configuration. 
+[Managed Service Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/overview) are a system backed by Azure Active Directory that assigns an identity to services, including those running within AKS. This identity can then be given permission to Azure Services such as Azure KeyVault. This provides a neat and abstracted way to “seed” the first step in the security chain – something somewhere needs to initiate access and have keys to the system. No credentials are needed in code or in app configuration. 
 
 ### Azure KeyVault
-Azure KeyVault is an option for safeguarding and managing / cycling keys outside of the software’s deployment. It can manage and cycle certificates and is backed by HSMs. 
+[Azure KeyVault](https://docs.microsoft.com/en-gb/azure/key-vault/key-vault-overview) is an option for safeguarding and managing / cycling keys outside of the software’s deployment. It can manage and cycle certificates and is backed by HSMs. 
 
 ### Cluster lock down 
 The cluster can be configured to interrogate all changes before they are applied. This is configurable by the cluster administrator. Containers can be checked, configurations validated or rejected and signatures validated before they are allowed admission to the cluster.   
@@ -181,4 +181,5 @@ A custom service can scan the cluster to ensure its actual state complies with e
 Clusters can be configured to automatically modify deployments to add features to pods in a pattern called a sidecar. These containers can perform extra tasks such as validate that other services in the cluster are who they say they are and also encrypt traffic automatically between containers. Istio is one such open source product that implements this and is utilised as part of this design. 
 
 ### Data Migration
-Whilst data import is supported using standard tooling such as cqlsh,  large data volumes would need special consideration for enterprise scale tooling. For this task we recommend the Azure Data Factory. ADF is an enterprise grade integration service for moving and modifying large sets of data. 
+*For example - from Cassandra*
+Whilst data import is supported using [standard tooling such as cqlsh](https://docs.microsoft.com/en-us/azure/cosmos-db/cassandra-import-data),  large data volumes would need special consideration for enterprise scale tooling. For this task we recommend the [Azure Data Factory](https://docs.microsoft.com/en-us/azure/data-factory/introduction). ADF is an enterprise grade integration service for moving and modifying large sets of data. 
