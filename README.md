@@ -12,6 +12,7 @@ June 2018
         - [Cosmos DB](#cosmos-db)
         - [Existing Code](#existing-code)
     - [Main System Components](#main-system-components)
+    - [Technical Features](#technical-features)
     - [Design Features](#design-features)
         - [The Kubernetes (K8S) Cluster is development environment](#the-kubernetes-k8s-cluster-is-development-environment)
         - [Highly available cluster nodes](#highly-available-cluster-nodes)
@@ -110,6 +111,10 @@ A second cluster is alive and running in Melbourne. Deployments are automaticall
 Keys and secrets are managed by a mixture [Azure KeyVault](https://azure.microsoft.com/en-gb/services/key-vault/), [Managed Service Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/overview) and services are secured where possible using [Service Endpoints](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview). 
 
 The rest of the document describes the design goals and features of the system. 
+
+## Technical Features
+
+This system uses [Istio](https://istio.io/docs/concepts/what-is-istio/overview/) for intelligent routing, [Helm](https://helm.sh/) for flexiable and dynamic deployments, [StatefulSets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) for managing always on services (Zookeeper and Nimbus for exmaple) +much more. 
 
 ## Design Features
 ### The Kubernetes (K8S) Cluster is development environment
