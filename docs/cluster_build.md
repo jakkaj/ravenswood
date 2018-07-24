@@ -19,7 +19,7 @@
 
 <!-- /TOC -->
 
-*Note* This guide is tailored for Microsoft Azure deployment, but could easily be adapted to run on other cloud providors or locally hosted Kubernetes clusters as most of the detail is Kubernetes native. 
+*Note* This guide is tailored for Microsoft Azure deployment, but could easily be adapted to run on other cloud providers or locally hosted Kubernetes clusters as most of the detail is Kubernetes native. 
 
 ## Two Clusters
 
