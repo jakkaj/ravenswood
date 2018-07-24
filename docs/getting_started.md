@@ -1,12 +1,21 @@
 
 
-# Required Software
 
-## Linux OS
+
+<!-- TOC -->
+
+- [Getting Started](#getting-started)
+- [Operating System](#operating-system)
+    - [Use the Container](#use-the-container)
+    - [Linux Software](#linux-software)
+
+<!-- /TOC -->
+
+# Operating System
 
 The scripts and techniques employed in this system are designed to run on Linux system (or build agent) or the Windows based [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10). 
 
-### Use the Container  
+## Use the Container  
 
 Rather than configure a system with all the detailed requirements, you can just build the Dockerfile in /cluster/Dockerfile. 
 
@@ -16,7 +25,7 @@ Even if you don't decide to do this you can use that file as a reference for the
 - `docker build -t clusterbuilder .`
 - `docker run -it clusterbuilder bash` to log in and start running!
 
-### Linux Software
+## Linux Software
 *Configure your machine or build environment*
 
 These instructions are geared towards Ubuntu.
