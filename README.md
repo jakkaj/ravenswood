@@ -8,6 +8,9 @@ June 2018
 - [Ravenswood](#ravenswood)
     - [TODO](#todo)
     - [Overview](#overview)
+        - [Why Stream Processing?](#why-stream-processing)
+        - [Intelligent Routing](#intelligent-routing)
+        - [Other Technologies](#other-technologies)
         - [Managed Kubernetes](#managed-kubernetes)
         - [Cosmos DB](#cosmos-db)
         - [Existing Code](#existing-code)
@@ -81,6 +84,21 @@ The result is a simple, elegant system based on the powerful feature sets availa
 The system is two or more Kubernetes clusters split across geo-separate regions in to which the Apache Storm clusters (or equivalent workload), services and other software is deployed. The Storm cluster is deployed as one single unit including Zoo Keeper, Nimbus and Supervisor nodes. When an updated version needs to be deployed, the entire cluster can be re-deployed as a single unit or individual components can be deployed and then migrated to using techniques including intelligent routing. For example, a new version of a service that helps enrich the Storm event stream can be deployed and switched over to at runtime once it has been tested – without any downtime what-so-ever.   
 
 The core principal here is that once things are deployed they are not modified – they are never updated. They are only even deleted. A new version will be deployed alongside the old version then the system will switch over to the new version, with the old version being cleaned up at some time in the future. This helps manage deployment complexity and manage cluster state. With the power of the K8S orchestrator, it only makes sense to rely on it to enable these desirable scenarios. 
+
+### Why Stream Processing?
+
+A stream processing system takes a small piece of data and runs it through a pipeline to add and enrich the data from various sources. These sources could be databases or machine learning scoring systems. This data is then saved re-emitted to another stream (Kafka or Event Hubs) and/or saved to a database. All this happens very quickly - sometimes in the order of milliseconds - meaning near real-time enrichment of data streams. 
+
+Each stream processing step (which in Apache Storm are called "bolts") will in some way modify and re-emit te data. One way to do this is to call a service to mutate the data. In this system the services are deployed along side the pipeline in Kubernetes. 
+
+
+### Intelligent Routing
+
+A system such as [Istio](https://istio.io/docs/setup/kubernetes/quick-start/) can route to these services intelligently. It can route based on a cluster wide setting (meaning you can change which service is called at runtime), or it can route based in data that was added by previous steps. Importantly the actual processing step (the Bolt) is not aware of the intelligent routing - it does not need to know which actual service is being called - decoupling the complexity of versioning and routing away from the process step. 
+
+### Other Technologies
+
+This same approach can work with other technologies such as [Spark Streaming](https://spark.apache.org/streaming/) or [Kafka Streams](https://kafka.apache.org/documentation/streams/). Indeed it could work with non-streaming related systems include web endpoints etc. 
 
 ### Managed Kubernetes
 The Kubernetes clusters themselves are created with a managed service called the Azure Kubernetes Service or AKS. AKS is a system which creates and manages a vanilla version of Kubernetes for the customer – underlying VMs are automatically patched by Azure and system maintenance is automated. The customer only needs to worry about their own software running within the cluster inside the Docker containers. 
