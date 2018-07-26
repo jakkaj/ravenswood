@@ -10,7 +10,10 @@
         - [Delete all services from both clusters](#delete-all-services-from-both-clusters)
         - [Script CLI parameters](#script-cli-parameters)
         - [Test the cluster](#test-the-cluster)
+        - [Load the UI](#load-the-ui)
         - [1.deploy_toplology.sh](#1deploy_toplologysh)
+        - [Test the Topology](#test-the-topology)
+        - [Send Some Test Events](#send-some-test-events)
 - [Chart Operation](#chart-operation)
 
 <!-- /TOC -->
@@ -123,7 +126,49 @@ During deployment the clusters output their kubectl config files:
 
 You can enable these by entering `export KUBECONFIG=/fullpathtofile`. 
 
+Once you've done this, type:
 
+```bash
+kubectl get pods,svc
+```
+
+This will show you the system
+
+### Load the UI
+
+In the output from the above command will look as follows
+
+```
+NAME                               TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)                      AGE
+service/kubernetes                 ClusterIP      10.0.0.1       <none>         443/TCP                      46m
+service/nimbus-cs-2-yourbuild-1    ClusterIP      10.0.99.249    <none>         3772/TCP,6627/TCP            2m
+service/nimbus-hs-2-yourbuild-1    ClusterIP      None           <none>         3772/TCP,6627/TCP            2m
+service/stormui-cs-2-yourbuild-1   LoadBalancer   10.0.104.64    13.72.226.38   80:32243/TCP                 2m
+service/svc1-2-yourbuild-1         ClusterIP      10.0.159.167   <none>         80/TCP                       2m
+service/svc2-2-yourbuild-1         ClusterIP      10.0.31.40     <none>         80/TCP                       2m
+service/svc3-2-yourbuild-1         ClusterIP      10.0.55.19     <none>         80/TCP                       2m
+service/zk-cs-2-yourbuild-1        ClusterIP      10.0.161.71    <none>         2181/TCP                     3m
+service/zk-hs-2-yourbuild-1        ClusterIP      None           <none>         2888/TCP,3888/TCP,2181/TCP   3m
+
+NAME                                                 READY     STATUS    RESTARTS   AGE
+pod/hearts-2-yourbuild-1-56dbdc7f44-5q79b            2/2       Running   0          3m
+pod/nimbus-2-yourbuild-1-0                           2/2       Running   0          2m
+pod/nimbus-2-yourbuild-1-1                           2/2       Running   0          2m
+pod/stormsupervisor-2-yourbuild-1-5f554498bf-2j5xn   2/2       Running   0          2m
+pod/stormsupervisor-2-yourbuild-1-5f554498bf-qz7ct   2/2       Running   0          2m
+pod/stormui-2-yourbuild-1-5c48c95887-5zpjc           2/2       Running   0          2m
+pod/svc1-v1-2-yourbuild-1-55dc7d88fb-7md4p           2/2       Running   0          2m
+pod/svc1-v2-2-yourbuild-1-74f9547f6d-r69fw           2/2       Running   0          2m
+pod/svc2-v1-2-yourbuild-1-6ccd6d5495-th5vb           2/2       Running   0          2m
+pod/svc2-v2-2-yourbuild-1-79c4d476f5-pzh6m           2/2       Running   0          2m
+pod/svc3-v1-2-yourbuild-1-5f99bc57b8-w6b2g           2/2       Running   0          2m
+pod/svc3-v2-2-yourbuild-1-774876899b-jcwxv           2/2       Running   0          2m
+pod/zk-2-yourbuild-1-0                               1/1       Running   0          3m
+pod/zk-2-yourbuild-1-1                               1/1       Running   0          3m
+pod/zk-2-yourbuild-1-2                               1/1       Running   0          3m
+```
+
+Note: `service/stormui-cs-1-yourbuild`. Next to this is a public IP - this will be the Storm UI
 
 ### 1.deploy_toplology.sh
 
@@ -131,7 +176,36 @@ Once the services are deployed, ZooKeeper, Nimbus, the services, configs, heartb
 
 In this system, toplogies are baked in to Docker containers and deployed using DevOps practices. No commands are ever run on the cluster directly. 
 
-Running `/deployment/Scripts/1.deploy_toplology.sh' will take the current topology 
+Running `/deployment/Scripts/1.deploy_toplology.sh' will take the current topology.
+
+### Test the Topology
+
+Again looking at the output from `kubectl get pods,svc` review that the toplology has been deployed. 
+
+```
+pod/stormtoplogy-2-yourbuild-165hhk                  0/2       Init:0/2   0          4s
+```
+
+then
+
+```
+pod/stormtoplogy-2-yourbuild-165hhk                  2/2       Running   0          1m
+```
+
+then
+
+```
+pod/stormtoplogy-2-yourbuild-165hhk                  1/2       Completed   0          1m\
+```
+Of note that if you're running dual clusters you might see that the toplogy container gets stuck on init - this is because of the [fail over](fail_over.md) feature!
+
+Once that is compelted, check the Storm UI and you should see the new toplogy has been deployed (in the Topology Summary section). Click on the topology for more details. 
+
+### Send Some Test Events
+
+At present, you'll not that the toplogy is reporting no activite (nothing in the Emitted and Transferred areas). 
+
+To get this whirring, you'll need to send some test events. See [Sending Test Events](sending_test_events.md) for more information. 
 
 # Chart Operation
 

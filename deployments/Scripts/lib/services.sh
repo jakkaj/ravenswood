@@ -16,7 +16,7 @@ echo "Update ZooKeeper"
 helm template $setter -f ../Helm/zookeeper/values.yaml ../Helm/zookeeper | kubectl $kcommand -f -
 if [ "$kcommand" == "create" ]; then
     echo "Letting ZK get a head start"
-    sleep 10
+    sleep 60
 fi
 echo "Update Nimbus"
 helm template $setter -f ../Helm/nimbus/values.yaml ../Helm/nimbus | kubectl $kcommand -f -

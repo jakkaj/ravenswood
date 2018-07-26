@@ -43,6 +43,7 @@ Start with `sudo apt-get update`.
 - curl and wget - `sudo apt-get install curl wget -y`
 - nano - `apt-get install nano -y`
 - [kubecfg](https://www.npmjs.com/package/kubecfg) for easier cluster management - `npm install -g kubecfg`
+- [.NET Core 2.1 SDK](https://www.microsoft.com/net/download/dotnet-core/2.1) (for the [Event Generator and Sample output apps](sending_test_events.md))
 
 
 # Azure Services
