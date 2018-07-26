@@ -10,6 +10,7 @@ Thanks to [Kenneth Ownes](https://github.com/kow3ns/kubernetes-zookeeper) for so
 
 - [Ravenswood](#ravenswood)
     - [TODO](#todo)
+    - [How](#how)
     - [Overview](#overview)
         - [Why Stream Processing?](#why-stream-processing)
         - [What is Actually Deployed?](#what-is-actually-deployed)
@@ -49,6 +50,20 @@ Thanks to [Kenneth Ownes](https://github.com/kow3ns/kubernetes-zookeeper) for so
 
 ## TODO
 This repo is in progress. Documentation on the *how* is underway. Right now it's just code samples and this document.
+
+## How
+
+Jump straight to the juicy bits - the code. 
+
+- [Getting Started](docs/getting_started.md)
+- [Building the Clusters](docs/cluster_build.md)
+- [Deploying the Bits](docs/deploying_the_bits.md)
+- [Sending Test Events](docs/sending_test_events.md)
+- [Building the Containers](docs/docker.md)
+- [Editing the Topology](docs/editing_topology.md)
+- [Testing the Intelligent Routing](docs/intelligent_routing.md)
+- [Testing the Fail Over](docs/fail_over.md)
+- [Components of the System](docs/system_components.md)
 
 ## Overview
 The Ravenswood Reference Architecture is a modern description and sample detailing how to build a highly available, high performance data processing pipeline.  
