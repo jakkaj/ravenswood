@@ -9,14 +9,15 @@
         - [Apply the Script](#apply-the-script)
         - [Delete all services from both clusters](#delete-all-services-from-both-clusters)
         - [Script CLI parameters](#script-cli-parameters)
-- [Chart Operation](#chart-operation)
+        - [Test the cluster](#test-the-cluster)
         - [1.deploy_toplology.sh](#1deploy_toplologysh)
+- [Chart Operation](#chart-operation)
 
 <!-- /TOC -->
 
 # Deployment
 
-
+Watch a [video demo](https://www.youtube.com/watch?v=2AHJubKtNwQ). 
 
 Once the clusters are created and running it's time to deploy the software. 
 
@@ -113,6 +114,25 @@ fi
 
 This parameter is then passed in to all `kubectl` commands. 
 
+### Test the cluster
+
+During deployment the clusters output their kubectl config files:
+
+- ACS Kubectl configs are stored in `/builds/$ver/acs_kubeconfig.json`
+- AKS Kubectl configs are stored in `/builds/$ver/aks_kubeconfig.yaml`
+
+You can enable these by entering `export KUBECONFIG=/fullpathtofile`. 
+
+
+
+### 1.deploy_toplology.sh
+
+Once the services are deployed, ZooKeeper, Nimbus, the services, configs, heartbeat and Storm UI will be deployed. The next stage is to deploy a test topology.
+
+In this system, toplogies are baked in to Docker containers and deployed using DevOps practices. No commands are ever run on the cluster directly. 
+
+Running `/deployment/Scripts/1.deploy_toplology.sh' will take the current topology 
+
 # Chart Operation
 
 Each of the charts has a `values.yaml` file that outlines the values (with samples) that will be used by the template generation. These values are modified by the scripts during deployment. 
@@ -140,8 +160,4 @@ helm template $setter -f ../Helm/zookeeper/values.yaml ../Helm/zookeeper | kubec
 ```
 
 This command pipes the output of the `helm template` command in to `kubectl` directly without needing to be written to a file. 
-
-### 1.deploy_toplology.sh
-
-Once the services are deployed, ZooKeeper, Nimbus, the services, configs, heartbeat and Storm UI will be deployed. The next stage is to deploy a test topology
 

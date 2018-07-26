@@ -16,10 +16,13 @@
         - [2.a.create_aks.sh](#2acreate_akssh)
         - [2.b.create_acsengine.sh](#2bcreate_acsenginesh)
         - [3.config_cluster.sh](#3config_clustersh)
+- [Kubectl Configurations](#kubectl-configurations)
 
 <!-- /TOC -->
 
 *Note* This guide is tailored for Microsoft Azure deployment, but could easily be adapted to run on other cloud providers or locally hosted Kubernetes clusters as most of the detail is Kubernetes native. 
+
+[Watch the Video](https://youtu.be/H5e4Mq_FzzA).
 
 ## Two Clusters
 
@@ -30,6 +33,50 @@ In this case (as the scripts are currently configured) an [Azure Kubernetes Serv
 ## DevOps
 
 The scripts herein are used to automatically set up the clusters either from a Linux terminal or from a VSTS server. 
+
+You can use the following script with small modifications in VSTS
+
+```yaml
+resources:
+- repo: self
+queue:
+  name: Hosted Linux Preview
+  condition: succeeded()
+#Your build pipeline references the ‘version’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
+steps:
+- bash: . 'cluster/acsengine/installacsengine.sh' 
+  displayName: Bash Script
+
+- task: tsuyoshiushio.k8s-endpoint.downloader-task.downloader@1
+  displayName: downloader 
+  inputs:
+    k8sService: 'AKS-k8s-test'
+    IstioVersion: 0.8.0
+    helmVersion: 2.9.1
+
+- task: jakkaj.vsts-yaml-writer.custom-build-release-task.YamlWriter@0
+  displayName: YamlWriter 
+  inputs:
+    file: 'cluster/scripts/config.json'
+    set: 'ver=''$(version)-$(Build.BuildNumber)''
+    json: true
+
+- task: AzureCLI@1
+  displayName: Azure CLI scripts/0.runall.sh
+  inputs:
+    azureSubscription: 'Jordo Microsoft Azure Internal Consumption (e39a92b5-b9a4-43d1-97a3-c31c819a583a)'
+    scriptPath: 'cluster/scripts/0.runall.sh'
+    workingDirectory: scripts
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Artifact: clusterbuild-$(version)-$(Build.BuildNumber)
+  inputs:
+    PathtoPublish: '$(Build.Repository.LocalPath)/builds'
+    ArtifactName: 'clusterbuild-$(version)-$(Build.BuildNumber)'
+```
+
+Too Easy! See [this video](https://youtu.be/H5e4Mq_FzzA) for a visual demo of this. 
+
 
 ## Configuration 
 
@@ -98,13 +145,13 @@ Run this script to set up your clusters.
 ### 2.a.create_aks.sh
 
 - Runs the ARM deployment of the AKS cluster based on `/arm/kube-managed.json` config options
-- Extracts the AKS Kubectl configs and stores them in `/builds/$ver/aks_kubeconfig.yaml`
+- Extracts the AKS kubectl configs and stores them in `/builds/$ver/aks_kubeconfig.yaml`
 
 ### 2.b.create_acsengine.sh
 
 - Generates the ARM templates using acs-engine
 - Runs the ARM deployment of the acs-engine cluster based on `../builds/$ver/$resourcegroup/azuredeploy.parameters.json` config options
-- Extracts the AKS Kubectl configs and stores them in `/builds/$ver/acs_kubeconfig.json`
+- Extracts the acs-engine kubectl configs and stores them in `/builds/$ver/acs_kubeconfig.json`
 
 ### 3.config_cluster.sh
 
@@ -120,4 +167,9 @@ These scripts will take approximately 10-20 minutes to complete.
 
 
 
+# Kubectl Configurations
 
+The build process will output the `kubecfg` files for both clusters:
+
+- The ACS Kubectl configs are stored in `/builds/$ver/acs_kubeconfig.json`
+- The AKS Kubectl configs are stored in `/builds/$ver/aks_kubeconfig.yaml`
