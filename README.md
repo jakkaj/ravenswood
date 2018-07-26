@@ -3,12 +3,16 @@
 Jordan Knight, Lace Lofranco, Vaughan Knight, Regan Murphy, Rian Finnegan, et. al.
 June 2018
 
+Thanks to [Matthew Farrellee](https://github.com/mattf) <matt@cs.wisc.edu> for inspiration and for getting us started with the Dockerisation steps.  
+
+Thanks to [Kenneth Ownes](https://github.com/kow3ns/kubernetes-zookeeper) for solving so much of the ZooKeeper stuff which was a great starting place. 
 <!-- TOC -->
 
 - [Ravenswood](#ravenswood)
     - [TODO](#todo)
     - [Overview](#overview)
         - [Why Stream Processing?](#why-stream-processing)
+        - [What is Actually Deployed?](#what-is-actually-deployed)
         - [Intelligent Routing](#intelligent-routing)
         - [Other Technologies](#other-technologies)
         - [Managed Kubernetes](#managed-kubernetes)
@@ -40,7 +44,6 @@ June 2018
         - [Cluster lock down](#cluster-lock-down)
         - [Cluster Sentinel](#cluster-sentinel)
         - [Service Identity Verification](#service-identity-verification)
-        - [Data Migration](#data-migration)
 
 <!-- /TOC -->
 
@@ -91,6 +94,20 @@ A stream processing system takes a small piece of data and runs it through a pip
 
 Each stream processing step (which in Apache Storm are called "bolts") will in some way modify and re-emit te data. One way to do this is to call a service to mutate the data. In this system the services are deployed along side the pipeline in Kubernetes. 
 
+### What is Actually Deployed?
+
+This system by default will deploy:
+
+- Configurable amount of ZooKeeper services in a [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) complete with [anti-pod affinity](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity) and update strategies
+- Configurable amount of Nimubs nodes with the same StatefulSets, anti-pod affinity and update strategies
+- Configurable amount of Storm Supervisor nodes
+- Apache Storm UI
+- Three sample services each with two versions for intelligent routing demonstrations
+- Storage Configuration
+- Secrets and Configuration
+- A heart beat generating services
+- A sample storm topology
+- Some starting Istio routes
 
 ### Intelligent Routing
 
@@ -99,6 +116,10 @@ A system such as [Istio](https://istio.io/docs/setup/kubernetes/quick-start/) ca
 ### Other Technologies
 
 This same approach can work with other technologies such as [Spark Streaming](https://spark.apache.org/streaming/) or [Kafka Streams](https://kafka.apache.org/documentation/streams/). Indeed it could work with non-streaming related systems include web endpoints etc. 
+
+The same tech and approaches (scripts, Helm, Istio, Kubernetes etc.) could even be applied when Apache Storm is entirely removed from the equation - instead perhaps opting for PaaS based Spark Streaming in [Azure HDInsight](https://docs.microsoft.com/en-us/azure/hdinsight/spark/apache-spark-streaming-overview) or even something as cool as [Databricks](https://azure.microsoft.com/en-au/services/databricks/). 
+
+In this regard, this repo can be used for ideas, nuggets and suggestions on how to go about building a scalable and adaptable - and above all DevOps focused stream processing platform. A scalable and HA/DR Zookeeper + Nimubs + Storm Supervisor system is complex and this example solves this well - it can most certainly be used as a starting point for other similar systems.  
 
 ### Managed Kubernetes
 The Kubernetes clusters themselves are created with a managed service called the Azure Kubernetes Service or AKS. AKS is a system which creates and manages a vanilla version of Kubernetes for the customer – underlying VMs are automatically patched by Azure and system maintenance is automated. The customer only needs to worry about their own software running within the cluster inside the Docker containers. 
@@ -239,7 +260,3 @@ A custom service can scan the cluster to ensure its actual state complies with e
 
 ### Service Identity Verification
 Clusters can be configured to automatically modify deployments to add features to pods in a pattern called a sidecar. These containers can perform extra tasks such as validate that other services in the cluster are who they say they are and also encrypt traffic automatically between containers. Istio is one such open source product that implements this and is utilised as part of this design. 
-
-### Data Migration
-*For example - from Cassandra*
-Whilst data import is supported using [standard tooling such as cqlsh](https://docs.microsoft.com/en-us/azure/cosmos-db/cassandra-import-data),  large data volumes would need special consideration for enterprise scale tooling. For this task we recommend the [Azure Data Factory](https://docs.microsoft.com/en-us/azure/data-factory/introduction). ADF is an enterprise grade integration service for moving and modifying large sets of data. 
