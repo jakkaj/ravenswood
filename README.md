@@ -9,10 +9,13 @@ Thanks to [Kenneth Ownes](https://github.com/kow3ns/kubernetes-zookeeper) for so
 <!-- TOC -->
 
 - [Ravenswood](#ravenswood)
-    - [TODO](#todo)
+    - [Work in Progress](#work-in-progress)
     - [How](#how)
     - [Overview](#overview)
-        - [Why Stream Processing?](#why-stream-processing)
+        - [Stream Processing](#stream-processing)
+        - [Funamental Principals](#funamental-principals)
+            - [Immutable and Well Versioned Deployments](#immutable-and-well-versioned-deployments)
+        - [Core Tenets](#core-tenets)
         - [What is Actually Deployed?](#what-is-actually-deployed)
         - [Intelligent Routing](#intelligent-routing)
         - [Other Technologies](#other-technologies)
@@ -48,7 +51,7 @@ Thanks to [Kenneth Ownes](https://github.com/kow3ns/kubernetes-zookeeper) for so
 
 <!-- /TOC -->
 
-## TODO
+## Work in Progress
 This repo is in progress. Documentation on the *how* is underway. Right now it's just code samples and this document.
 
 ## How
@@ -66,11 +69,40 @@ Jump straight to the juicy bits - the code.
 - [Components of the System](docs/system_components.md)
 
 ## Overview
-The Ravenswood Reference Architecture is a modern description and sample detailing how to build a highly available, high performance data processing pipeline.  
+The Ravenswood Reference Architecture is a modern description and sample detailing how to build a highly available, high performance near-realtime stream processing pipeline.  
 
 It is designed and maintained by a group of Microsoft Engineers from the ground up with cloud first and engineering principles in mind. 
 
 The guide includes code, documentation and samples on how to build and deploy such a system. Please note: This document is not the full guide, it is an overview for dissemination purposes. 
+
+### Stream Processing
+
+A stream processing system takes a small piece of data and runs it through a pipeline to add and enrich the data from various sources. These sources could be databases or machine learning scoring systems. This data is then saved re-emitted to another stream (Kafka or Event Hubs) and/or saved to a database. All this happens very quickly - sometimes in the order of milliseconds - meaning near real-time enrichment of data streams. This is opposed to processing later with batch processing or processing using database capabilities such as joins etc (which is very expensive and doesn't scale as well).
+
+Each stream processing step (which in Apache Storm are called "bolts") will in some way modify and re-emit te data. One way to do this is to call a service to mutate the data. In this system the services are deployed along side the pipeline in Kubernetes. 
+
+An alternate method would be batch processing whereby data is enriched in place later (maybe soon after) it is written. Often streaming is used with batch processing such as in the [lambda architecture](https://en.wikipedia.org/wiki/Lambda_architecture). 
+
+This document is based on Apache Storm, but can easily be adapted to use [Spark Structured Streaming](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html) or other similar technologies. 
+
+### Funamental Principals
+
+#### Immutable and Well Versioned Deployments
+
+An immutable deployment, as the name suggests, is a deployment that cannot be changed after it has been deployed. This principal is applied in our other projects including our [ML training and scoring DevOps pipeline](https://github.com/jakkaj/ml-train-deploy-vsts-k8s).  
+
+The principal drives some good system design principals:
+
+- Good versioning strategy
+- Separated deployments. Deploy the same code side by side in a different deployment
+- Blue/Green Deployments as you cannot replace a deployment
+- Separation of concerns including code versioning, routing and security
+- Providence of all deployments including code, settings, cluster configuration and more
+- End-to-end no humans directly affecting the software
+
+
+### Core Tenets
+
 The following requirements and tenets for the basis for the design of the system.
 Tenets and requirements
 
@@ -102,12 +134,6 @@ The result is a simple, elegant system based on the powerful feature sets availa
 The system is two or more Kubernetes clusters split across geo-separate regions in to which the Apache Storm clusters (or equivalent workload), services and other software is deployed. The Storm cluster is deployed as one single unit including Zoo Keeper, Nimbus and Supervisor nodes. When an updated version needs to be deployed, the entire cluster can be re-deployed as a single unit or individual components can be deployed and then migrated to using techniques including intelligent routing. For example, a new version of a service that helps enrich the Storm event stream can be deployed and switched over to at runtime once it has been tested – without any downtime what-so-ever.   
 
 The core principal here is that once things are deployed they are not modified – they are never updated. They are only even deleted. A new version will be deployed alongside the old version then the system will switch over to the new version, with the old version being cleaned up at some time in the future. This helps manage deployment complexity and manage cluster state. With the power of the K8S orchestrator, it only makes sense to rely on it to enable these desirable scenarios. 
-
-### Why Stream Processing?
-
-A stream processing system takes a small piece of data and runs it through a pipeline to add and enrich the data from various sources. These sources could be databases or machine learning scoring systems. This data is then saved re-emitted to another stream (Kafka or Event Hubs) and/or saved to a database. All this happens very quickly - sometimes in the order of milliseconds - meaning near real-time enrichment of data streams. 
-
-Each stream processing step (which in Apache Storm are called "bolts") will in some way modify and re-emit te data. One way to do this is to call a service to mutate the data. In this system the services are deployed along side the pipeline in Kubernetes. 
 
 ### What is Actually Deployed?
 

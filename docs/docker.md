@@ -61,7 +61,7 @@ This container is similar to the Nimus one, but instead of starting a Storm Nimb
 
 `deployments/Docker/topology/Dockerfile`
 
-A core tenet of this system is immatable deployments. The cluster is not modified, only new deployments are added (or removed). To this end, event deploying a new Storm topology is done via a deployment. 
+A core tenet of this system is immutable deployments. The cluster is not modified, only new deployments are added (or removed). To this end, event deploying a new Storm topology is done via a deployment. 
 
 This container when built takes a pre-built Storm topology. It's startup script will deploy the topology. This is much better than applying a command to a pod running in the cluster as it's repeatable and has provenance. 
 
@@ -108,5 +108,7 @@ The idea of this environment variable reflection is that you can use the same co
 ## Basic Environment Writer
 
 A simple form of this environment reflection container is available on GitHub [here](https://github.com/jakkaj/basic-env-write). 
+
+
 
 
