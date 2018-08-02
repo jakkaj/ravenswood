@@ -2,6 +2,24 @@
 
 This system is based heavily around [Helm](https://helm.sh/). It provides the mechanism to properly separate versions of code amongst other things. 
 
+<!-- TOC -->
+
+- [Helm](#helm)
+- [Nuggets](#nuggets)
+    - [Versioning](#versioning)
+    - [Dynamic Settings](#dynamic-settings)
+- [Helm Charts](#helm-charts)
+    - [Config](#config)
+    - [Heartbeat](#heartbeat)
+    - [Nimbus and Zookeeper charts](#nimbus-and-zookeeper-charts)
+    - [Services](#services)
+    - [Storage](#storage)
+    - [Supervisor](#supervisor)
+    - [Topology](#topology)
+    - [UI](#ui)
+
+<!-- /TOC -->
+
 # Nuggets
 
 Some nuggets from the Helm part of the project. Below these nuggets is the full explanation of the Helm Charts which highlight some interesting things about each chart. 
