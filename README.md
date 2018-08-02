@@ -100,6 +100,8 @@ The principal drives some good system design principals:
 - Providence of all deployments including code, settings, cluster configuration and more
 - End-to-end no humans directly affecting the software
 
+See the [Deployments Explained](deployments_explained.md) document for more. 
+
 
 ### Core Tenets
 
