@@ -4,7 +4,7 @@ This system is based heavily around [Helm](https://helm.sh/). It provides the me
 
 # Nuggets
 
-Some nuggets from the Helm part of the project. Below these nuggets is the full explanation of the Helm Charts. 
+Some nuggets from the Helm part of the project. Below these nuggets is the full explanation of the Helm Charts which highlight some interesting things about each chart. 
 
 ## Versioning 
 
@@ -71,9 +71,6 @@ helm template $setter -f ../Helm/configs/values.yaml ../Helm/configs | kubectl $
 - `../Helm/configs` the chart that is being used
 - `| kubectl $kcommand -f -` pipes the data from the helm template build to `kubectl` without having to be written to the filesystem.  `$kcommand` is the parameter passed in from the terminal (`apply` `delete` etc.) to apply the script to create or delete the deployment. 
 
-
-
-
 # Helm Charts
 
 This section explains the chats this project uses. Each chart takes a version and applies it so that the items that are deployed ([StatefulSets](https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/), [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/), [Services](https://kubernetes.io/docs/concepts/services-networking/service/), [Configs](https://kubernetes.io/docs/concepts/services-networking/service/), [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) [etc.](https://www.google.com.au/search?q=define+etc.&rlz=1C1CHBF_en-GBAU727AU727&oq=define+etc.&aqs=chrome..69i57j69i61j69i60l2j69i65j69i61.967j0j4&sourceid=chrome&ie=UTF-8#dobs=et%20cetera))
@@ -98,4 +95,134 @@ cosmos_key: "val_cosmos_key"
 cosmos_database_name: "val_cosmos_database_name"
 cosmos_collection_name: "val_cosmos_collection_name"
 ```
+
+Of note is that secrets and configs are separated as proposed in the [design document](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/auth/secrets.md). 
+
+## Heartbeat
+
+`/deployments/Helm/heartbeat`
+
+This deploys the heartbeat service. This service writes a hearbeat every few seconds to an [Azure Files](https://docs.microsoft.com/en-us/azure/storage/files/storage-files-introduction) SMB share. 
+
+Note the volume mounts which load the Azure Files share that is created and configured during the [Cluster Build](cluster_build.md). 
+
+```yaml
+    volumeMounts:
+    - mountPath: /hb
+        name: hbvolume      
+
+volumes:
+- name: hbvolume
+persistentVolumeClaim:
+    claimName: azurefilecustom
+```
+
+Note the heartbeat folder is modified to write to a sub-folder location unique to this deployment version. 
+
+Also note that the cluster configuration is pulled from the [Config Map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) and exposed to the pod as an [Environment Variable](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/). 
+
+```yaml
+env:
+- name: HEART_BEAT_FOLDER
+    value: /hb/v{{.Values.Version}}-{{.Values.Build}}
+- name: THIS_CLUSTER
+    valueFrom:
+    configMapKeyRef:                 
+        name: ravenswoodconfig                 
+        key: this_cluster
+- name: THAT_CLUSTER
+    valueFrom:
+    configMapKeyRef:                 
+        name: ravenswoodconfig                 
+        key: other_cluster
+```
+
+## Nimbus and Zookeeper charts
+
+`/deployments/Helm/nimbus`
+
+`/deployments/Helm/zookeeper`
+
+These charts are similar.
+
+Deploys the [Apache Storm Nimbus](https://storm.apache.org/releases/2.0.0-SNAPSHOT/Setting-up-a-Storm-cluster.html) nodes as a  Kubernetes [StatefulSet](https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/). 
+
+Note the [PodDisruptionBudget](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/#how-disruption-budgets-work) and the [updateStrategy](https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/#updating-statefulsets) which allow the set to be upgraded within limits of the Nimbus design principles (number of nodes that must be running). 
+
+Note the [antiPodAffinity](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity) which allows for highly available design considerations by limiting deployment of the pod to nodes that already contain the same pod. 
+
+## Services
+
+`/deployments/Helm/services`
+
+Deploys multiple versions of the sample services. 
+
+Of note is that the services are quite simple - they reflect an envionment variable (as described in the [Docker](docker.md) document). This allows for the same service to be deployed multiple times to demonstrate versioning and [intelligent routing](intelligent_routing.md). 
+
+```yaml
+env:
+- name: WRITE_BACK
+    value: svc1v1    
+```
+
+## Storage
+
+`/deployments/Helm/storage`
+
+Deploys the [Azure Files](https://docs.microsoft.com/en-us/azure/storage/files/storage-files-introduction) shared location as a [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) which can be accessed in pods from multiple clusters - for usage in the [heartbeat](fail_over.md). 
+
+Of note that it creates a [Kubernetes Secret](https://kubernetes.io/docs/concepts/configuration/secret/) containing the details of the share (rather than hard-coding directly in the chart). 
+
+## Supervisor
+`/deployments/Helm/supervisor`
+
+Deploys a configurable number of [supervisor](https://storm.apache.org/releases/2.0.0-SNAPSHOT/Setting-up-a-Storm-cluster.html) nodes - which are the workhorses of an Apache Storm cluster. 
+
+Of interest is that the Storm Nimbus and Zookeeper configuration is passed through from the [config map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) and exposed as a file which is then used by the setup script (`/deployments/docker/base/configure.sh`)
+
+```yaml
+volumes:
+      - name: application-config
+        configMap:
+          name: app-config-{{.Values.Version}}-{{.Values.Build}}
+          items:
+          - key: nimbusnodes
+            path: nimbusnodes
+          - key: zookeepernodes
+            path: zookeepernodes
+```
+
+```bash
+echo "nimbus.seeds:" >> conf/storm.yaml
+cat $CONFIG_BASE/nimbusnodes >> conf/storm.yaml
+```
+
+## Topology
+
+`/deployments/Helm/topology`
+
+Deploys the Storm Topology in to the Storm cluster. 
+
+Of note is that it uses an [initContainer](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to block the deployment if it's running in the "b" cluster. This init container will unblock of the [heartbeat flatlines](fail_over.md). 
+
+```yaml
+initContainers:
+  - name: heartmon
+    imagePullPolicy: {{.Values.ImagePullPolicy}}
+    image: {{.Values.ImageHeartMon}}
+    resources:
+      requests:
+        memory: {{.Values.Memory}}
+        cpu: {{.Values.Cpu}}   
+```
+
+## UI
+
+`/deployments/Helm/ui`
+
+Deploys the Storm UI which can be used to check the status of the Storm cluster. See [Deploying the Bits](deploying_the_bits.md) for information on how to access it (hint `kubectl get svc`). 
+
+
+
+
 
