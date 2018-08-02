@@ -42,7 +42,7 @@ This command asks Helm to process the template located at `../Helm/configs` usin
 
 # The Components
 
-Each component of the system is detailed in the [System Components](system_components.md) file. They are ZooKeeper, Nimbus, the enrichment test services, configs and secrets, heartbeat and Storm UI. 
+Each component of the system is detailed in the [System Components](helm.md) file. They are ZooKeeper, Nimbus, the enrichment test services, configs and secrets, heartbeat and Storm UI. 
 
 # Scripts
 

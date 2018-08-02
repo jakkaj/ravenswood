@@ -22,6 +22,7 @@ This reference design has the capability to fail over to a second cluster. There
     - [Heart Monitor](#heart-monitor)
 - [Virtual Network Peering](#virtual-network-peering)
     - [Warning: Internal Load Balancers](#warning-internal-load-balancers)
+- [Trigger the Fail Over](#trigger-the-fail-over)
 
 <!-- /TOC -->
 
@@ -200,4 +201,8 @@ Using this communication method might be another way of cluster to cluster commu
 
 ## Warning: Internal Load Balancers
 Be aware that internal load balancers will not allow communication from another vNET even if it's peered. 
+
+# Trigger the Fail Over
+
+In this system, the fail over can be caused by killing the heartbeat pod. This is not truly representative of the system processing messages. An alternative method might be to monitor the Event Hubs queue offset file to ensure it's moving along - or to directly monitor the storm cluster itself. 
 

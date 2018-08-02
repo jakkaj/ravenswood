@@ -66,7 +66,7 @@ Jump straight to the juicy bits - the code.
 - [Editing the Topology](docs/editing_topology.md)
 - [Testing the Intelligent Routing](docs/intelligent_routing.md)
 - [Testing the Fail Over](docs/fail_over.md)
-- [Components of the System](docs/system_components.md)
+- [Components of the System](docs/helm.md)
 
 ## Overview
 The Ravenswood Reference Architecture is a modern description and sample detailing how to build a highly available, high performance near-realtime stream processing pipeline.  
