@@ -13,7 +13,7 @@ Thanks to [Kenneth Ownes](https://github.com/kow3ns/kubernetes-zookeeper) for so
     - [How](#how)
     - [Overview](#overview)
         - [Stream Processing](#stream-processing)
-        - [Funamental Principals](#funamental-principals)
+        - [Fundamental Principals](#fundamental-principals)
             - [Immutable and Well Versioned Deployments](#immutable-and-well-versioned-deployments)
         - [Core Tenets](#core-tenets)
         - [What is Actually Deployed?](#what-is-actually-deployed)
@@ -85,7 +85,7 @@ An alternate method would be batch processing whereby data is enriched in place 
 
 This document is based on Apache Storm, but can easily be adapted to use [Spark Structured Streaming](https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html) or other similar technologies. 
 
-### Funamental Principals
+### Fundamental Principals
 
 #### Immutable and Well Versioned Deployments
 
